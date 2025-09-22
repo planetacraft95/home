@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Servidor Minecraft - Landing</title>
+  <style>
+    :root{
+      --bg: #0b0f14;
+      --surface: #141b22;
+      --surface-2: #1e2a35;
+      --text: #e6eaf0;
+      --muted: #a6b4c2;
+      --accent: #4f9aff;
+      --green: #2ecc71;
+      --red: #e74c3c;
+      --card: rgba(255,255,255,0.04);
+      --shadow: 0 10px 25px rgba(0,0,0,.25);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI";height:100%}
+    a{color:var(--accent);text-decoration:none}
+    header{padding:20px; text-align:center}
+    h1{margin:0;font-size:1.8rem}
+    .subtitle{color:var(--muted); font-size:.95rem}
+    main{max-width:1100px;margin:0 auto;padding:20px}
+    .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));}
+    .card{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px}
+    .card h3{margin:0;font-size:1.1rem}
+    .tag{display:inline-block;background:#1e2a35;color:#9bd0ff;padding:4px 8px;border-radius:999px;font-size:.75rem}
+    .btn{display:inline-flex;align-items:center;gap:8px;justify-content:center;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:linear-gradient(#2a3744,#1b2832);color:white;cursor:pointer;text-align:center}
+    .btn.primary{background: linear-gradient(135deg, #2b9cff 0%, #1f6bd3 100%);border: none}
+    .btn.ghost{background: transparent;border:1px solid rgba(255,255,255,.25);color:var(--text)}
+    .modal-wrap{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:20px}
+    .modal{background:var(--surface);border-radius:12px;width:100%;max-width:520px;padding:20px;box-shadow:var(--shadow)}
+    .modal h2{margin:0 0 10px}
+    .row{display:flex;flex-wrap:wrap;gap:10px}
+    .field{flex:1 1 180px;display:flex;flex-direction:column;gap:6px}
+    label{font-size:.85rem;color:var(--muted)}
+    input,textarea,select{padding:10px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:#0b141d;color:var(--text);width:100%}
+    textarea{min-height:100px; resize:vertical}
+    .feedback{font-size:.85rem;color:var(--green)}
+    .error{color:#ff8b8b}
+    @media (max-width:600px){
+      .grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Servidor Minecraft - Gestión y Registro</h1>
+    <div class="subtitle">IP del Servidor: novalith.funserver.top | Versiones compatibles: 1.18, 1.19, 1.20, 1.21</div>
+  </header>
+
+  <main>
+    <section aria-label="Modos de juego">
+      <h2 style="margin:0 0 12px">Modalidades</h2>
+      <div class="grid" id="modos">
+        <!-- Modos se deben generar dinámicamente desde datos; ejemplo estático abajo -->
+        <article class="card" aria-label="Modo Solo">
+          <span class="tag">Solos</span>
+          <h3>Supervivencia</h3>
+          <p style="color:var(--muted);margin:0">Desafíos base, recursos limitados y aventuras intensas.</p>
+          <div style="flex:1 1 auto"></div>
+          <button class="btn primary" onclick="openRequestModal('Supervivencia')">Solicitar</button>
+        </article>
+        <article class="card" aria-label="Modo Equipo">
+          <span class="tag">Equipo</span>
+          <h3>Construcción</h3>
+          <p style="color:var(--muted);margin:0">Modo creativo con restricciones y objetivos de equipo.</p>
+          <div style="flex:1 1 auto"></div>
+          <button class="btn primary" onclick="openRequestModal('Construcción')">Solicitar</button>
+        </article>
+        <article class="card" aria-label="Modo PvP">
+          <span class="tag">PvP</span>
+          <h3>Arena</h3>
+          <p style="color:var(--muted);margin:0">Batallas rápidas y torneos con puntuación.</p>
+          <div style="flex:1 1 auto"></div>
+          <button class="btn primary" onclick="openRequestModal('Arena PvP')">Solicitar</button>
+        </article>
+      </div>
+    </section>
+
+    <section aria-label="Solicitar" style="margin-top:20px;">
+      <button class="btn" onclick="openRequestModal('General')">Abrir Solicitud de Modalidad</button>
+    </section>
+  </main>
+
+  <!-- Modal de Solicitud (oculto por defecto) -->
+  <div id="requestModal" class="modal-wrap" style="display:none" aria-modal="true" role="dialog" aria-labelledby="modalTitle">
+    <div class="modal" role="document">
+      <h2 id="modalTitle">Solicitud de Modalidad</h2>
+      <p style="color:var(--muted);margin-top:0" id="modalSubtitle">Completa la información para registrar una nueva modalidad.</p>
+      <form id="requestForm" autocomplete="off" novalidate>
+        <div class="row" style="align-items: flex-end">
+          <div class="field" style="flex:2 1 260px">
+            <label for="nombre">Nombre de la modalidad</label>
+            <input type="text" id="nombre" name="nombre" required placeholder="Ej. Prison" />
+            <span class="error" id="errNombre" aria-live="polite" style="display:none">Este campo es obligatorio.</span>
+          </div>
+          <div class="field" style="flex:1 1 160px">
+            <label for="version">Versión compatible</label>
+            <select id="version" name="version" required>
+              <option value="">Selecciona</option>
+              <option>1.18</option>
+              <option>1.19</option>
+              <option>1.20</option>
+              <option>1.21</option>
+            </select>
+            <span class="error" id="errVersion" aria-live="polite" style="display:none">Selecciona una versión.</span>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:8px">
+          <label for="descripcion">Descripción</label>
+          <textarea id="descripcion" name="descripcion" placeholder="Describe la modalidad, reglas y configuración." required></textarea>
+          <span class="error" id="errDescripcion" aria-live="polite" style="display:none">Descripción requerida.</span>
+        </div>
+
+        <div class="row" style="margin-top:8px;align-items:center">
+          <button type="button" class="btn ghost" onclick="closeRequestModal()">Cancelar</button>
+          <button type="submit" class="btn primary" style="margin-left:auto">Enviar solicitud</button>
+        </div>
+
+        <div id="formFeedback" class="feedback" style="margin-top:8px;display:none"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Datos de ejemplo (en producción, obtén de API)
+    const modos = [
+      { nombre: "Supervivencia", version: "1.21" },
+      { nombre: "Construcción", version: "1.20" },
+      { nombre: "Arena PvP", version: "1.19" }
+    ];
+
+    // Funciones de UI
+    function openRequestModal(prefill) {
+      const modal = document.getElementById('requestModal');
+      document.getElementById('modalTitle').textContent = 'Solicitud de modalidad';
+      document.getElementById('modalSubtitle').textContent = 'Completa la información para registrar una nueva modalidad.';
+      document.getElementById('nombre').value = prefill || '';
+      document.getElementById('descripcion').value = '';
+      document.getElementById('version').value = '';
+      document.getElementById('formFeedback').style.display = 'none';
+      modal.style.display = 'flex';
+      // Enfoque para accesibilidad
+      document.getElementById('nombre').focus();
+    }
+
+    function closeRequestModal() {
+      document.getElementById('requestModal').style.display = 'none';
+    }
+
+    // Validación básica (en producción, usa Zod en el cliente y servidor)
+    const form = document.getElementById('requestForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      let ok = true;
+      const nombre = document.getElementById('nombre');
+      const version = document.getElementById('version');
+      const descripcion = document.getElementById('descripcion');
+
+      // reset
+      ['errNombre','errVersion','errDescripcion'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+
+      if (!nombre.value.trim()) {
+        document.getElementById('errNombre').style.display = 'block';
+        ok = false;
+      }
+      if (!version.value) {
+        document.getElementById('errVersion').style.display = 'block';
+        ok = false;
+      }
+      if (!descripcion.value.trim()) {
+        document.getElementById('errDescripcion').style.display = 'block';
+        ok = false;
+      }
+
+      if (!ok) {
+        return;
+      }
+
+      // En producción, envía al backend:
+      // const payload = { nombre: nombre.value.trim(), version: version.value, descripcion: descripcion.value.trim() };
+      // try { await fetch('/api/solicitudes', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }); showFeedback('Solicitud enviada correctamente', true); } catch(err){ showFeedback('Error al enviar, intenta luego', false); }
+
+      // Mock success
+      showFeedback('Solicitud enviada correctamente ( mock ).', true);
+      form.reset();
+    });
+
+    function showFeedback(msg, ok) {
+      const fb = document.getElementById('formFeedback');
+      fb.textContent = msg;
+      fb.style.display = 'block';
+      fb.style.color = ok ? '#9bdc91' : '#ff8b8b';
+      if (ok) setTimeout(() => closeRequestModal(), 1200);
+    }
+
+    // Inicializar (opcionalmente renderizar modos)
+    // Este bloque está como ejemplo; puedes generar dinámicamente si conectas a API.
+    // const container = document.getElementById('modos');
+    // modos.forEach(m => { ... });
+  </script>
+</body>
+</html>
