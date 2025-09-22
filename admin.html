@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin - Panel de Solicitudes</title>
+  <style>
+    :root{
+      --bg: #0b0f14;
+      --surface: #141b22;
+      --text: #e6eaf0;
+      --muted: #a6b4c2;
+      --card: rgba(255,255,255,0.04);
+      --shadow: 0 8px 20px rgba(0,0,0,.25);
+      --accent: #4f9aff;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui}
+    header{padding:20px;text-align:center;border-bottom:1px solid rgba(255,255,255,.08)}
+    h1{margin:0}
+    main{padding:20px; max-width:1100px;margin:0 auto}
+    .card{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;box-shadow:var(--shadow); margin-bottom:14px}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    input,select{padding:10px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:#0b141d;color:var(--text);min-width:180px}
+    table{width:100%;border-collapse:collapse;margin-top:8px}
+    th,td{border-bottom:1px solid rgba(255,255,255,.08);padding:8px;text-align:left}
+    .badge{padding:4px 8px;border-radius:999px;background:#1e2a35;color:#9bdcff;font-size:.75rem}
+    .btn{padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.25); background: linear-gradient(#2a3744,#1b2832); color:white; cursor:pointer}
+    .btn.primary{background: linear-gradient(135deg, #2b9cff 0%, #1f6bd3 100%);border:none}
+    .btn.danger{background:#e74c3c;border:none}
+    @media (max-width: 700px){
+      .row{flex-direction:column}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin - Gestión de Solicitudes</h1>
+    <div class="subtitle" style="color:var(--muted)">Autenticación básica simulada para ejemplo.</div>
+  </header>
+
+  <main>
+    <section class="card" aria-label="Autenticación">
+      <h2 style="margin:0 0 8px">Acceso de Administrador</h2>
+      <div class="row" role="group" aria-label="Autenticación">
+        <input id="user" placeholder="Usuario" />
+        <input id="pass" type="password" placeholder="Contraseña" />
+        <button class="btn primary" onclick="login()">Iniciar sesión</button>
+      </div>
+      <div id="loginMsg" style="margin-top:8px;color:#ffb4b4" aria-live="polite"></div>
+    </section>
+
+    <section class="card" aria-label="Filtrar y Buscar" id="adminPanel" style="display:none">
+      <h2 style="margin:0 0 8px">Solicitudes</h2>
+      <div class="row" style="margin-bottom:8px">
+        <input id="search" placeholder="Buscar por nombre, modal, estado..." />
+        <select id="statusFilter">
+          <option value="">Todos</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="aprobada">Aprobada</option>
+          <option value="rechazada">Rechazada</option>
+        </select>
+        <button class="btn" onclick="loadRequests()">Cargar</button>
+      </div>
+
+      <table aria-label="Tabla de solicitudes">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Modalidad</th>
+            <th>Versión</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="requestsBody">
+          <!-- A llenar dinámicamente -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    // Mock de autenticación
+    function login(){
+      const u = document.getElementById('user').value;
+      const p = document.getElementById('pass').value;
+      const msg = document.getElementById('loginMsg');
+      if(u === 'admin' && p === 'admin'){ // solo para demo
+        msg.textContent = '';
+        document.getElementById('adminPanel').style.display = 'block';
+      } else {
+        msg.textContent = 'Credenciales inválidas. Usar usuario: admin, contraseña: admin';
+        document.getElementById('adminPanel').style.display = 'none';
+      }
+    }
+
+    // Cargar datos (mock)
+    const mockData = [
+      { id:1, nombre:'Prison', modal:'Arena PvP', version:'1.21', estado:'pendiente' },
+      { id:2, nombre:'Cosméticos', modal:'Construcción', version:'1.20', estado:'aprobada' },
+      { id:3, nombre:'Rápido', modal:'Supervivencia', version:'1.19', estado:'rechazada' }
+    ];
+
+    function loadRequests(){
+      const body = document.getElementById('requestsBody');
+      const q = document.getElementById('search').value.toLowerCase();
+      const st = document.getElementById('statusFilter').value;
+      body.innerHTML = '';
+      const items = mockData.filter(item=>{
+        const matchesQ = !q || Object.values(item).join(' ').toLowerCase().includes(q);
+        const matchesS = !st || item.estado === st;
+        return matchesQ && matchesS;
+      });
+      if(items.length===0){
+        body.innerHTML = '<tr><td colspan="5" style="color:var(--muted)">No se encontraron resultados.</td></tr>';
+        return;
+      }
+      items.forEach(it=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${it.nombre}</td>
+          <td>${it.modal}</td>
+          <td>${it.version}</td>
+          <td><span class="badge" aria-label="Estado">${it.estado}</span></td>
+          <td>
+            <button class="btn" onclick="updateStatus(${it.id},'pendiente')">Pendiente</button>
+            <button class="btn primary" onclick="updateStatus(${it.id},'aprobada')">Aprobar</button>
+            <button class="btn danger" onclick="updateStatus(${it.id},'rechazada')">Rechazar</button>
+          </td>
+        `;
+        body.appendChild(tr);
+      });
+    }
+
+    function updateStatus(id, status){
+      const idx = mockData.findIndex(x => x.id===id);
+      if(idx>=0){
+        mockData[idx].estado = status;
+        loadRequests();
+      }
+    }
+
+    // Inicializar (oculto hasta login)
+  </script>
+</body>
+</html>
