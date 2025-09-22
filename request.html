@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Solicitar Modalidad</title>
+  <style>
+    :root{
+      --bg: #0b0f14;
+      --surface: #141b22;
+      --text: #e6eaf0;
+      --muted: #a6b4c2;
+      --card: rgba(255,255,255,0.04);
+      --shadow: 0 8px 20px rgba(0,0,0,.25);
+      --accent: #4f9aff;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui}
+    .container{max-width:900px;margin:0 auto;padding:20px}
+    .card{background:var(--card);border-radius:12px;border:1px solid rgba(255,255,255,.08);padding:16px;box-shadow:var(--shadow)}
+    h2{margin:0 0 8px}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    label{font-size:.85rem;color:var(--muted)}
+    input,textarea,select{padding:10px;border-radius:6px;border:1px solid rgba(255,255,255,.25);background:#0b141d;color:var(--text);min-width:180px}
+    textarea{min-height:120px;resize:vertical}
+    .btn{padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.25);background: linear-gradient(#2a3744,#1b2832);color:white}
+    .btn.primary{background: linear-gradient(135deg, #2b9cff 0%, #1f6bd3 100%);border:none}
+    .error{color:#ff8b8b;font-size:.9rem}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="card" aria-label="Nueva solicitud">
+      <h2>Nueva Solicitud de Modalidad</h2>
+      <p style="color:var(--muted);margin-top:0">Completa los campos para registrar una nueva modalidad en el sistema.</p>
+      <form id="form" autocomplete="off" novalidate>
+        <div class="row">
+          <div style="flex:2 1 280px" class="field">
+            <label for="name">Nombre</label>
+            <input id="name" name="name" required placeholder="Ej. Prison" />
+            <span class="error hidden" id="eName">Campo obligatorio</span>
+          </div>
+          <div style="flex:1 1 180px" class="field">
+            <label for="ver">Versión</label>
+            <select id="ver" name="ver" required>
+              <option value="">Selecciona</option>
+              <option>1.18</option>
+              <option>1.19</option>
+              <option>1.20</option>
+              <option>1.21</option>
+            </select>
+            <span class="error hidden" id="eVer">Selecciona una versión</span>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:8px">
+          <label for="desc">Descripción</label>
+          <textarea id="desc" name="desc" placeholder="Reglas, configuración y detalles" required></textarea>
+          <span class="error hidden" id="eDesc">Descripción requerida</span>
+        </div>
+
+        <div style="margin-top:10px; display:flex; gap:8px;">
+          <button type="button" class="btn" onclick="resetForm()">Limpiar</button>
+          <button class="btn primary" type="submit">Enviar solicitud</button>
+        </div>
+        <div id="status" class="hidden" role="status" aria-live="polite" style="margin-top:8px"></div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('form');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name');
+      const ver = document.getElementById('ver');
+      const desc = document.getElementById('desc');
+      let ok = true;
+
+      const fields = [
+        {el: name, err: 'eName'},
+        {el: ver, err: 'eVer'},
+        {el: desc, err: 'eDesc'},
+      ];
+
+      fields.forEach(f => {
+        const el = document.getElementById(f.err);
+        if(!f.el.value || (typeof f.el.value === 'string' && f.el.value.trim()==='')) {
+          el.classList.remove('hidden');
+          ok = false;
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      if(!ok) return;
+
+      // Aquí conectas con tu API para crear la solicitud
+      // const payload = { name: name.value.trim(), version: ver.value, description: desc.value.trim() };
+      // await fetch('/api/solicitudes', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+
+      const status = document.getElementById('status');
+      status.textContent = 'Solicitud enviada (simulado).';
+      status.style.display = 'block';
+      status.style.color = '#9bdcff';
+      form.reset();
+    });
+
+    function resetForm(){
+      form.reset();
+      ['eName','eVer','eDesc'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      document.getElementById('status').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
